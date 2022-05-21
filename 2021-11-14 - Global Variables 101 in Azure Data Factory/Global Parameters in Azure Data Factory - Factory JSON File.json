@@ -1,0 +1,17 @@
+{
+	"name": "MyDataFactory",
+	"properties": {
+		"globalParameters": {
+			"AzureDataLakeURL": {
+				"type": "string",
+				"value": "https://mydatalakename.dfs.core.windows.net/"
+			}
+		}
+	},
+	"location": "southafricanorth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "12345678-4321-0987-6748-123456789076",
+		"tenantId": "12345678-4321-0987-6748-123456789076"
+	}
+}
