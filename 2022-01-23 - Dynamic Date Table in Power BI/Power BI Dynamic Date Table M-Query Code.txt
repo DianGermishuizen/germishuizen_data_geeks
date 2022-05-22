@@ -1,0 +1,44 @@
+let
+    //Fixed Start Date
+    StartDate = #date(2021,1,1),
+    //Dynamic End Of Current Year End Date
+    EndDate = #date(Date.Year(DateTime.FixedLocalNow()), 12, 31),
+    //Number of days used to determine length of list of dates to generate
+    NumberOfDays = Duration.Days( EndDate - StartDate ),
+    //Create a list of dates between start and end date
+    Dates = List.Dates(StartDate, NumberOfDays+1, #duration(1,0,0,0)),
+    //Convert the list to a full table
+    #"Converted to Table" = Table.FromList(Dates, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    //Give the Date field a proper name
+    #"Renamed Columns" = Table.RenameColumns(#"Converted to Table",{{"Column1", "Date"}}),
+    //Proper data type for the date field to allow intelligent date aspects extraction
+    #"Changed Type Of Date Field" = Table.TransformColumnTypes(#"Renamed Columns",{{"Date", type date}}),
+    //Get the Year of the date
+    #"Inserted Year" = Table.AddColumn(#"Changed Type Of Date Field", "Year", each Date.Year([Date]), type number),
+    //Get the Month of the date
+    #"Inserted Month" = Table.AddColumn(#"Inserted Year", "Month", each Date.Month([Date]), type number),
+    //Get the Mmonth Name of the date
+    #"Inserted Month Name" = Table.AddColumn(#"Inserted Month", "Month Name", each Date.MonthName([Date]), type text),
+    //Get the Quarter of the date
+    #"Inserted Quarter" = Table.AddColumn(#"Inserted Month Name", "Quarter", each Date.QuarterOfYear([Date]), type number),
+    //Get the Week Number of the year of the date
+    #"Inserted Week of Year" = Table.AddColumn(#"Inserted Quarter", "Week of Year", each Date.WeekOfYear([Date]), type number),
+    //Get the Week Number Of The Month of the date
+    #"Inserted Week of Month" = Table.AddColumn(#"Inserted Week of Year", "Week of Month", each Date.WeekOfMonth([Date]), type number),
+    //Get the Day Number of the month of the date
+    #"Inserted Day" = Table.AddColumn(#"Inserted Week of Month", "Day", each Date.Day([Date]), type number),
+    //Get the Fay Number Of the Week of the date
+    #"Inserted Day of Week" = Table.AddColumn(#"Inserted Day", "Day of Week", each Date.DayOfWeek([Date]), type number),
+    //Get the Day Number Of The year of the date
+    #"Inserted Day of Year" = Table.AddColumn(#"Inserted Day of Week", "Day of Year", each Date.DayOfYear([Date]), type number),
+    //Get the Day Name of the date
+    #"Inserted Day Name" = Table.AddColumn(#"Inserted Day of Year", "Day Name", each Date.DayOfWeekName([Date]), type text),
+    //Generate a finacial year value, using the #"Financial Year Offset" paramter number
+    #"Insert Financial Year" = Table.AddColumn(#"Inserted Day Name", "Financial Year", each Date.Year(Date.AddMonths([Date],#"Financial Year Offset")), type number),
+    //Generate a finacial month value, using the #"Financial Year Offset" paramter number
+    #"Insert Financial Period" = Table.AddColumn(#"Insert Financial Year", "Financial Period", each Date.Month(Date.AddMonths([Date],#"Financial Year Offset")), type number),
+    //Create an integer representation of the date for joining to data warehouse tables if needed
+    DateID = Table.AddColumn(#"Insert Financial Period", "DateID", each Date.ToText([Date], "yyyyMMdd"), type number),
+    #"Changed Type Of All Fields" = Table.TransformColumnTypes(DateID,{{"DateID", Int64.Type},{"Year", Int64.Type}, {"Day of Year", Int64.Type}, {"Day of Week", Int64.Type}, {"Day", Int64.Type}, {"Week of Month", Int64.Type}, {"Week of Year", Int64.Type}, {"Quarter", Int64.Type}, {"Month", Int64.Type}})
+in
+    #"Changed Type Of All Fields"
