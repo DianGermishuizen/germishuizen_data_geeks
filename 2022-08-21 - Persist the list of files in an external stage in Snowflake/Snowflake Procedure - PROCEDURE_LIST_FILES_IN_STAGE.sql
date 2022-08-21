@@ -27,7 +27,7 @@ $$
 	try {
 		/* Ensure the current session is in the correct database */
 		var usedb_stmt = snowflake.createStatement({
-			sqlText: 'USE SCHEMA "PC_FIVETRAN_DB"."OZOW_PROD_REPORTING";'
+			sqlText: 'USE SCHEMA "MY_SCHEMA_NAME";'
 		}).execute();
 
 		/* Make a template command that will be concatenated with the stage name passed in as parameter.
